@@ -653,3 +653,69 @@ const DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
     }
 
 })();
+function driveQueueGet() {
+  try { return JSON.parse(localStorage.getItem(DRIVE_QUEUE_KEY) || "[]"); }
+  catch { return []; }
+}
+
+function driveQueueSet(arr) {
+  localStorage.setItem(DRIVE_QUEUE_KEY, JSON.stringify(arr || []));
+}
+
+async function enviarRegistroADrive(registro) {
+  // Importante: no-cors + text/plain evita CORS desde GitHub Pages
+  const payload = JSON.stringify({ apiKey: DRIVE_API_KEY, registro });
+
+  await fetch(DRIVE_ENDPOINT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: payload
+  });
+
+  // Con no-cors no se puede leer respuesta; si no hubo excepción, asumimos enviado.
+  return true;
+}
+
+async function flushPendientesDrive() {
+  const pendientes = driveQueueGet();
+  if (!pendientes.length) return;
+
+  const restantes = [];
+  for (const reg of pendientes) {
+    try {
+      await enviarRegistroADrive(reg);
+    } catch (e) {
+      restantes.push(reg);
+    }
+  }
+  driveQueueSet(restantes);
+
+  // Opcional: aviso corto si se enviaron
+  if (pendientes.length && restantes.length === 0) {
+    mostrarAlerta?.("✅ Pendientes enviados a Drive"); // si ya tenés una función de alert/toast
+  }
+}
+btnGuardar.addEventListener("click", () => {
+  const registro = construirRegistro();  // o juntar datos del form
+  guardarLocal(registro);
+  actualizarHistorial();
+  // ...
+});
+// 1) Intentar guardar en Drive
+enviarRegistroADrive(registro)
+  .then(() => {
+    // ok silencioso o avisito
+    // mostrarAlerta?.("✅ Guardado en Drive");
+  })
+  .catch(() => {
+    // Si falla, lo ponemos en cola y queda local igual
+    const q = driveQueueGet();
+    q.push(registro);
+    driveQueueSet(q);
+    // mostrarAlerta?.("⚠️ No se pudo enviar a Drive, quedó local y pendiente");
+  });
+window.addEventListener("online", () => {
+  flushPendientesDrive();
+});
+flushPendientesDrive();
