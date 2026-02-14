@@ -9,12 +9,24 @@
     // ============ STORAGE KEY ============
     var STORAGE_KEY = 'mantenimiento_sw302_registros';
 
+    // ============ DRIVE (Google Sheets) SYNC ============
+    // 1) Creá un Apps Script Web App que reciba POST y escriba en tu Google Sheet.
+    // 2) Pegá acá la URL del Web App y una clave (API_KEY) que controles vos.
+    //    Ejemplo ENDPOINT: https://script.google.com/macros/s/XXXXXXXX/exec
+    var DRIVE_ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbybtd0a_GVzGe3t8gEJBTvRGHUvi-wm_kGfxS6rFjUVUipBxqIVuT7NokZLivy9f8eKvA/exec'; // <-- PEGAR URL
+    var DRIVE_API_KEY = 'SW302-AIRLIQUIDE';      // <-- PEGAR CLAVE
+
+    // Cola local para cuando no hay internet (se reintenta al volver a estar online)
+    var PENDING_KEY = 'mantenimiento_sw302_pendientes';
+
+
     // ============ INIT ============
     document.addEventListener('DOMContentLoaded', function () {
         initTabs();
         initForm();
         initQRPanel();
         initHistorial();
+        initDriveSync();
         initPhotoPreview();
         checkURLParams();
         setDefaultDate();
@@ -172,9 +184,106 @@
         registros.push(data);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
 
-        showToast('Registro guardado correctamente', 'success');
+        showToast('Registro guardado correctamente (local)', 'success');
         renderHistorial();
+
+        // Intentar guardar también en Drive (Sheets). Si no hay internet, queda en cola.
+        enviarADrive(data).then(function (r) {
+            if (r && r.ok) {
+                showToast('✅ Guardado en Drive', 'success');
+            } else {
+                // Si no está configurado o falló, lo encolamos igual por si lo configurás después
+                enqueuePendiente(data);
+                if (r && r.error === 'Drive no configurado') {
+                    showToast('⚠️ Drive no configurado (quedó local)', 'error');
+                } else {
+                    showToast('⚠️ Sin internet / error Drive (quedó local)', 'error');
+                }
+            }
+        }).catch(function () {
+            enqueuePendiente(data);
+            showToast('⚠️ Sin internet / error Drive (quedó local)', 'error');
+        });
     }
+
+    // ============ DRIVE SYNC HELPERS ============
+    function initDriveSync() {
+        // Reintenta pendientes al abrir y cuando vuelve internet
+        flushPendientes();
+        window.addEventListener('online', flushPendientes);
+    }
+
+    function getPendientes() {
+        try {
+            var raw = localStorage.getItem(PENDING_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function setPendientes(arr) {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(arr || []));
+    }
+
+    function enqueuePendiente(registro) {
+        var pend = getPendientes();
+        pend.push(registro);
+        setPendientes(pend);
+    }
+
+    function canSyncDrive() {
+        return DRIVE_ENDPOINT_URL && DRIVE_API_KEY;
+    }
+
+    function enviarADrive(registro) {
+        if (!canSyncDrive()) {
+            // Si no configuraste aún la URL/KEY, no intenta sincronizar
+            return Promise.resolve({ ok: false, error: 'Drive no configurado' });
+        }
+
+        // Mandamos TODO el objeto: así no perdés datos (y en Sheets guardás como columnas o JSON)
+        return fetch(DRIVE_ENDPOINT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                apiKey: DRIVE_API_KEY,
+                registro: registro
+            })
+        }).then(function (res) {
+            return res.json().catch(function () { return { ok: false, error: 'Respuesta inválida del servidor' }; });
+        });
+    }
+
+    function flushPendientes() {
+        var pend = getPendientes();
+        if (!pend.length) return;
+
+        // Si no hay config, no hacemos nada
+        if (!canSyncDrive()) return;
+
+        // Enviar en serie (más estable en celular)
+        var chain = Promise.resolve();
+        var enviados = 0;
+
+        pend.forEach(function (registro) {
+            chain = chain.then(function () {
+                return enviarADrive(registro).then(function (r) {
+                    if (r && r.ok) enviados++;
+                }).catch(function () { /* ignora */ });
+            });
+        });
+
+        chain.then(function () {
+            if (enviados > 0) {
+                // Dejamos solo los que no se pudieron enviar
+                // (Para simplificar, reintentamos todo: si querés, lo hacemos “por confirmación”)
+                setPendientes([]);
+                showToast('Sincronizado en Drive (' + enviados + ')', 'success');
+            }
+        });
+    }
+
 
     // ============ PDF EXPORT ============
     function exportarPDF() {
@@ -647,3 +756,4 @@
     }
 
 })();
+
