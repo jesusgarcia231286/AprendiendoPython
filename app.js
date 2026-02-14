@@ -180,7 +180,24 @@ const DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
 
         showToast('Registro guardado correctamente', 'success');
         renderHistorial();
-    }
+    
+        // ====== Guardado en Google Sheets (Drive) ======
+        enviarRegistroADrive(data)
+          .then(function() {
+            // opcional: avisar éxito en Drive
+            // showToast('✅ Guardado en Drive', 'success');
+            flushPendientesDrive(); // por si había pendientes
+          })
+          .catch(function() {
+            // Si falla (sin internet/CORS/etc), se encola y queda local
+            try {
+              var q = driveQueueGet();
+              q.push(data);
+              driveQueueSet(q);
+            } catch (e) {}
+            showToast('⚠️ No se pudo enviar a Drive, quedó local', 'error');
+          });
+}
 
     // ============ PDF EXPORT ============
     function exportarPDF() {
@@ -719,3 +736,4 @@ window.addEventListener("online", () => {
   flushPendientesDrive();
 });
 flushPendientesDrive();
+
