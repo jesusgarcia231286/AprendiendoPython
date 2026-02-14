@@ -2,6 +2,12 @@
    MANTENIMIENTO SALAS ELÉCTRICAS – SW-302
    Lógica principal: formulario, QR, PDF, historial
    ============================================ */
+// ====== GOOGLE DRIVE / SHEETS (Apps Script WebApp) ======
+const DRIVE_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbwhucohILLFtF2UyIanDjgY6tnuF_xGdeGPSVQ_Ml6kPMD7xsShSk4r0W3j8EtyBelVqQ/exec";
+const DRIVE_API_KEY = "SW302-AIRLIQUIDE";
+
+// Cola local para cuando no hay internet
+const DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
 
 (function () {
     'use strict';
