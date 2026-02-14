@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mantenimiento Salas Eléctricas – SW-302</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="logo-icon">SW</div>
+                <div>
+                    <h1>Mantenimiento Salas Eléctricas</h1>
+                    <p class="subtitle">Sistema de Climatización – WESTRIC SW-302</p>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-btn active" data-tab="formulario">Formulario</button>
+                <button class="nav-btn" data-tab="qr-panel">QR por Sala</button>
+                <button class="nav-btn" data-tab="historial">Historial</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- ==================== TAB: FORMULARIO ==================== -->
+        <section id="tab-formulario" class="tab-content active">
+            <form id="mainForm" novalidate>
+
+                <!-- BLOQUE 1: IDENTIFICACIÓN -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">📋</span>
+                        <h2>Identificación</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row three-cols">
+                            <div class="form-group">
+                                <label for="sala">Sala</label>
+                                <select id="sala" name="sala" required>
+                                    <option value="">Seleccionar sala...</option>
+                                    <option value="Sala 1">Sala 1</option>
+                                    <option value="Sala 2">Sala 2</option>
+                                    <option value="Sala 3">Sala 3</option>
+                                    <option value="Sala 4">Sala 4</option>
+                                    <option value="Sala 5">Sala 5</option>
+                                    <option value="Sala 6">Sala 6</option>
+                                    <option value="Sala 7">Sala 7</option>
+                                    <option value="Sala 8">Sala 8</option>
+                                    <option value="Sala 9">Sala 9</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tecnico">Técnico</label>
+                                <input type="text" id="tecnico" name="tecnico" placeholder="Nombre del técnico" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha">Fecha</label>
+                                <input type="date" id="fecha" name="fecha" required>
+                            </div>
+                        </div>
+                        <div class="form-row two-cols">
+                            <div class="form-group">
+                                <label for="cliente">Cliente</label>
+                                <input type="text" id="cliente" name="cliente" placeholder="Nombre del cliente">
+                            </div>
+                            <div class="form-group">
+                                <label for="ubicacion">Ubicación</label>
+                                <input type="text" id="ubicacion" name="ubicacion" placeholder="Dirección / Planta">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 2: INSPECCIÓN ELÉCTRICA -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">🔌</span>
+                        <h2>Inspección Eléctrica</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="checkbox-grid">
+                            <label class="check-item"><input type="checkbox" name="elec_reapriete"> Reapriete de borneras</label>
+                            <label class="check-item"><input type="checkbox" name="elec_tension"> Tensión correcta</label>
+                            <label class="check-item"><input type="checkbox" name="elec_contactores"> Contactores OK</label>
+                            <label class="check-item"><input type="checkbox" name="elec_cables"> Cables sin sulfatación</label>
+                            <label class="check-item"><input type="checkbox" name="elec_sensor_limpio"> Sensor limpio</label>
+                            <label class="check-item"><input type="checkbox" name="elec_sensor_ubicado"> Sensor bien ubicado</label>
+                            <label class="check-item"><input type="checkbox" name="elec_placa"> Placa sin capacitores dañados</label>
+                            <label class="check-item"><input type="checkbox" name="elec_reles"> Relés en buen estado</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 3: MEDICIONES AMBIENTALES -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">🌡</span>
+                        <h2>Mediciones Ambientales</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row four-cols">
+                            <div class="form-group">
+                                <label for="temp_sala">Temperatura sala (°C)</label>
+                                <input type="number" step="0.1" id="temp_sala" name="temp_sala" placeholder="ej: 22.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="voltaje">Voltaje alimentación (V)</label>
+                                <input type="number" step="0.1" id="voltaje" name="voltaje" placeholder="ej: 220">
+                            </div>
+                            <div class="form-group">
+                                <label for="temp_westric">Temperatura Westric (°C)</label>
+                                <input type="number" step="0.1" id="temp_westric" name="temp_westric" placeholder="ej: 24.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="termometro_patron">Termómetro patrón (°C)</label>
+                                <input type="number" step="0.1" id="termometro_patron" name="termometro_patron" placeholder="ej: 23.2">
+                            </div>
+                        </div>
+                        <div class="form-row two-cols">
+                            <div class="form-group">
+                                <label for="humedad">Humedad (%)</label>
+                                <input type="number" step="0.1" id="humedad" name="humedad" placeholder="Opcional">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 4: EQUIPO DE AIRE 1 -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">❄️</span>
+                        <h2>Equipo de Aire 1</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row three-cols">
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <div class="radio-group">
+                                    <label class="radio-item"><input type="radio" name="equipo1_estado" value="Operativo"> Operativo</label>
+                                    <label class="radio-item"><input type="radio" name="equipo1_estado" value="Operativo con observación"> Operativo con observación</label>
+                                    <label class="radio-item"><input type="radio" name="equipo1_estado" value="No operativo"> No operativo</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="equipo1_consumo">Consumo medido (A)</label>
+                                <input type="number" step="0.1" id="equipo1_consumo" name="equipo1_consumo" placeholder="Amperios">
+                            </div>
+                            <div class="form-group">
+                                <label>Verificaciones</label>
+                                <label class="check-item"><input type="checkbox" name="equipo1_filtro"> Filtro limpio</label>
+                                <label class="check-item"><input type="checkbox" name="equipo1_condensadora"> Condensadora limpia</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="equipo1_obs">Observaciones equipo 1</label>
+                            <textarea id="equipo1_obs" name="equipo1_obs" rows="2" placeholder="Observaciones..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 5: EQUIPO DE AIRE 2 -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">❄️</span>
+                        <h2>Equipo de Aire 2</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row three-cols">
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <div class="radio-group">
+                                    <label class="radio-item"><input type="radio" name="equipo2_estado" value="Operativo"> Operativo</label>
+                                    <label class="radio-item"><input type="radio" name="equipo2_estado" value="Operativo con observación"> Operativo con observación</label>
+                                    <label class="radio-item"><input type="radio" name="equipo2_estado" value="No operativo"> No operativo</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="equipo2_consumo">Consumo medido (A)</label>
+                                <input type="number" step="0.1" id="equipo2_consumo" name="equipo2_consumo" placeholder="Amperios">
+                            </div>
+                            <div class="form-group">
+                                <label>Verificaciones</label>
+                                <label class="check-item"><input type="checkbox" name="equipo2_filtro"> Filtro limpio</label>
+                                <label class="check-item"><input type="checkbox" name="equipo2_condensadora"> Condensadora limpia</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="equipo2_obs">Observaciones equipo 2</label>
+                            <textarea id="equipo2_obs" name="equipo2_obs" rows="2" placeholder="Observaciones..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 6: SECUENCIADOR SW-302 -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">🔄</span>
+                        <h2>Secuenciador SW-302</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row four-cols">
+                            <div class="form-group">
+                                <label for="set_point">Set Point (°C)</label>
+                                <input type="number" step="0.1" id="set_point" name="set_point" placeholder="ej: 24">
+                            </div>
+                            <div class="form-group">
+                                <label for="alarma_alta">Alarma alta (°C)</label>
+                                <input type="number" step="0.1" id="alarma_alta" name="alarma_alta" placeholder="ej: 28">
+                            </div>
+                            <div class="form-group">
+                                <label for="tiempo_rotacion">Tiempo rotación t2</label>
+                                <input type="text" id="tiempo_rotacion" name="tiempo_rotacion" placeholder="ej: 12h">
+                            </div>
+                            <div class="form-group">
+                                <label for="modo_operacion">Modo (D/U)</label>
+                                <select id="modo_operacion" name="modo_operacion">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="D">D - Dual</option>
+                                    <option value="U">U - Unitario</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">Pruebas de ciclados</h3>
+                        <div class="checkbox-grid">
+                            <label class="check-item"><input type="checkbox" name="prueba_equipo1"> Equipo 1 operativo</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_equipo2"> Equipo 2 operativo</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_conmutacion"> Conmutación correcta</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_compresor"> Compresor arranca real</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_conmutacion_manual"> Conmutación manual</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_alta_temp"> Alta temperatura</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_falla_sensor"> Falla sensor</label>
+                            <label class="check-item"><input type="checkbox" name="prueba_entradas_e1e2"> Entradas E1/E2</label>
+                        </div>
+
+                        <h3 class="subsection-title">Alarmas</h3>
+                        <div class="checkbox-grid">
+                            <label class="check-item"><input type="checkbox" name="alarma_alta_probada"> Alta temperatura probada</label>
+                            <label class="check-item"><input type="checkbox" name="alarma_sirena"> Sirena activa</label>
+                            <label class="check-item"><input type="checkbox" name="alarma_rele"> Relé alarma OK</label>
+                            <label class="check-item"><input type="checkbox" name="alarma_falla_sensor"> Falla sensor detectada</label>
+                        </div>
+
+                        <h3 class="subsection-title">Entradas de falla</h3>
+                        <div class="checkbox-grid">
+                            <label class="check-item"><input type="checkbox" name="falla_e1"> E1 probada</label>
+                            <label class="check-item"><input type="checkbox" name="falla_e2"> E2 probada</label>
+                            <label class="check-item"><input type="checkbox" name="falla_cambio_auto"> Cambio automático correcto</label>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label>Estado general SW-302</label>
+                            <div class="radio-group horizontal">
+                                <label class="radio-item status-operativo"><input type="radio" name="sw302_estado" value="Operativo"> Operativo</label>
+                                <label class="radio-item status-observacion"><input type="radio" name="sw302_estado" value="Operativo con observación"> Con observación</label>
+                                <label class="radio-item status-riesgo"><input type="radio" name="sw302_estado" value="Riesgo"> Riesgo</label>
+                                <label class="radio-item status-critico"><input type="radio" name="sw302_estado" value="Crítico"> Crítico</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 7: FOTOS -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">📷</span>
+                        <h2>Evidencia Fotográfica</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row three-cols">
+                            <div class="form-group">
+                                <label for="foto_tablero">Foto tablero</label>
+                                <input type="file" id="foto_tablero" name="foto_tablero" accept="image/*" capture="environment">
+                                <div class="photo-preview" id="preview_tablero"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="foto_display">Foto display</label>
+                                <input type="file" id="foto_display" name="foto_display" accept="image/*" capture="environment">
+                                <div class="photo-preview" id="preview_display"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="foto_sala">Foto general sala</label>
+                                <input type="file" id="foto_sala" name="foto_sala" accept="image/*" capture="environment">
+                                <div class="photo-preview" id="preview_sala"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 8: DIAGNÓSTICO FINAL -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <span class="card-icon">📝</span>
+                        <h2>Diagnóstico Final</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Estado general de sala</label>
+                            <div class="radio-group horizontal">
+                                <label class="radio-item status-operativo"><input type="radio" name="estado_sala" value="Operativa"> 🟢 Operativa</label>
+                                <label class="radio-item status-observacion"><input type="radio" name="estado_sala" value="Observaciones"> 🟡 Observaciones</label>
+                                <label class="radio-item status-riesgo"><input type="radio" name="estado_sala" value="Riesgo"> 🔴 Riesgo</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones técnicas generales</label>
+                            <textarea id="observaciones" name="observaciones" rows="4" placeholder="Detalle las observaciones del mantenimiento..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="firma">Firma técnico</label>
+                            <input type="text" id="firma" name="firma" placeholder="Nombre completo del técnico responsable">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="form-actions">
+                    <button type="button" id="btnGuardar" class="btn btn-primary">Guardar Registro</button>
+                    <button type="button" id="btnPDF" class="btn btn-secondary">Exportar PDF</button>
+                    <button type="reset" class="btn btn-outline">Limpiar Formulario</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ==================== TAB: QR POR SALA ==================== -->
+        <section id="tab-qr-panel" class="tab-content">
+            <div class="form-card">
+                <div class="card-header">
+                    <span class="card-icon">🔳</span>
+                    <h2>Códigos QR por Sala</h2>
+                </div>
+                <div class="card-body">
+                    <p class="info-text">Cada QR abre el formulario con la sala pre-seleccionada. Imprimí y pegá el QR en cada sala eléctrica.</p>
+                    <div class="qr-grid" id="qrGrid">
+                        <!-- QR cards generados por JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: HISTORIAL ==================== -->
+        <section id="tab-historial" class="tab-content">
+            <div class="form-card">
+                <div class="card-header">
+                    <span class="card-icon">📊</span>
+                    <h2>Historial de Registros</h2>
+                </div>
+                <div class="card-body">
+                    <div class="historial-actions">
+                        <button type="button" id="btnExportCSV" class="btn btn-secondary">Exportar a CSV</button>
+                        <button type="button" id="btnLimpiarHistorial" class="btn btn-outline btn-danger">Limpiar Historial</button>
+                    </div>
+                    <div class="historial-stats" id="historialStats"></div>
+                    <div class="historial-list" id="historialList">
+                        <p class="empty-state">No hay registros guardados aún.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>Sistema de Mantenimiento WESTRIC SW-302 &mdash; Trazabilidad técnica profesional</p>
+    </footer>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
