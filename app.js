@@ -1,12 +1,4 @@
-/* ============================================
-   MANTENIMIENTO SALAS ELÉCTRICAS – SW-302
-   Lógica principal: formulario, QR, PDF, historial
-   ============================================ */
-
-(function () {
-    'use strict';
-
-    // ============ STORAGE KEY ============
+// ============ STORAGE KEY ============
     var STORAGE_KEY = 'mantenimiento_sw302_registros';
 
     // ============ DRIVE (Google Sheets) SYNC ============
@@ -245,13 +237,16 @@
         // Mandamos TODO el objeto: así no perdés datos (y en Sheets guardás como columnas o JSON)
         return fetch(DRIVE_ENDPOINT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 apiKey: DRIVE_API_KEY,
                 registro: registro
             })
-        }).then(function (res) {
-            return res.json().catch(function () { return { ok: false, error: 'Respuesta inválida del servidor' }; });
+        }).then(function () {
+            // Con mode:'no-cors' la respuesta es "opaque" y no se puede leer.
+            // Si no hubo excepción, asumimos que se envió correctamente.
+            return { ok: true };
         });
     }
 
@@ -756,4 +751,5 @@
     }
 
 })();
+
 
