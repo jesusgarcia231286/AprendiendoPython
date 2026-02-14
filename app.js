@@ -1,4 +1,12 @@
-// ============ STORAGE KEY ============
+/* ============================================
+   MANTENIMIENTO SALAS ELÉCTRICAS – SW-302
+   Lógica principal: formulario, QR, PDF, historial
+   ============================================ */
+
+(function () {
+    'use strict';
+
+    // ============ STORAGE KEY ============
     var STORAGE_KEY = 'mantenimiento_sw302_registros';
 
     // ============ DRIVE (Google Sheets) SYNC ============
@@ -751,5 +759,4 @@
     }
 
 })();
-
 
