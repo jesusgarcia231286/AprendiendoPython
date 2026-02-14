@@ -5,7 +5,7 @@
     // 1) Creá un Apps Script Web App que reciba POST y escriba en tu Google Sheet.
     // 2) Pegá acá la URL del Web App y una clave (API_KEY) que controles vos.
     //    Ejemplo ENDPOINT: https://script.google.com/macros/s/XXXXXXXX/exec
-    var DRIVE_ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbybtd0a_GVzGe3t8gEJBTvRGHUvi-wm_kGfxS6rFjUVUipBxqIVuT7NokZLivy9f8eKvA/exec'; // <-- PEGAR URL
+    var DRIVE_ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbwhucohILLFtF2UyIanDjgY6tnuF_xGdeGPSVQ_Ml6kPMD7xsShSk4r0W3j8EtyBelVqQ/exec'; // <-- PEGAR URL
     var DRIVE_API_KEY = 'SW302-AIRLIQUIDE';      // <-- PEGAR CLAVE
 
     // Cola local para cuando no hay internet (se reintenta al volver a estar online)
