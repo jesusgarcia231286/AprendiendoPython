@@ -1,0 +1,7 @@
+echo "# AprendiendoPython" >> README.md
+Git init
+git añadir README.md
+git commit -m "first commit"
+Rama git -M principal
+git remote añadir origen https://github.com/jesusgarcia231286/AprendiendoPython.git
+git push -u origen principal
