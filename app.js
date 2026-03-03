@@ -114,13 +114,19 @@ var DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
         var btnGuardar = document.getElementById('btnGuardar');
         var btnPDF = document.getElementById('btnPDF');
 
-        if (btnGuardar) {
+        
+        var btnCompartirPDF = document.getElementById('btnCompartirPDF');
+if (btnGuardar) {
             btnGuardar.addEventListener('click', guardarRegistro);
         }
         if (btnPDF) {
             btnPDF.addEventListener('click', exportarPDF);
         }
-    }
+    
+        if (btnCompartirPDF) {
+            btnCompartirPDF.addEventListener('click', compartirPDF);
+        }
+}
 
     function collectFormData() {
         var form = document.getElementById('mainForm');
@@ -291,6 +297,69 @@ function flushPendientesDrive() {
             }
         });
     }
+
+    // ============ PDF SHARE (WhatsApp / Android) ============
+    function compartirPDF() {
+        var data = collectFormData();
+        if (!data || !data.sala) {
+            showToast('Completá al menos la sala antes de compartir', 'error');
+            return;
+        }
+
+        showToast('Generando PDF para compartir...', '');
+
+        var pdfContent = buildPDFContent(data);
+
+        var opt = {
+            margin: [10, 10, 10, 10],
+            filename: 'Mantenimiento_' + (data.sala || 'Sala').replace(/\s/g, '_') + '_' + (data.fecha || 'sin_fecha') + '.pdf',
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generar blob y compartir (WhatsApp aparece en Android/Chrome)
+        html2pdf()
+            .set(opt)
+            .from(pdfContent)
+            .toPdf()
+            .get('pdf')
+            .then(function (pdf) {
+                var blob = pdf.output('blob');
+                var fileName = opt.filename;
+                var file = new File([blob], fileName, { type: 'application/pdf' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    return navigator.share({
+                        files: [file],
+                        title: 'Informe SW-302',
+                        text: 'Adjunto informe en PDF'
+                    });
+                }
+
+                // Fallback: descargar (luego se comparte desde WhatsApp)
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+
+                showToast('PDF descargado (compartilo por WhatsApp)', 'success');
+            })
+            .catch(function (e) {
+                console.error(e);
+                showToast('No se pudo generar/compartir el PDF', 'error');
+            })
+            .finally(function () {
+                if (pdfContent && pdfContent.parentNode) {
+                    pdfContent.parentNode.removeChild(pdfContent);
+                }
+            });
+    }
+
 
     function buildPDFContent(data) {
         var div = document.createElement('div');
@@ -735,3 +804,4 @@ function flushPendientesDrive() {
     }
 
 })();
+
