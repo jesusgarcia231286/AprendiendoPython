@@ -311,6 +311,53 @@ function flushPendientesDrive() {
             return;
         }
 
+        showToast('Preparando impresión...', '');
+
+        // Guardamos el HTML actual para restaurarlo después
+        var originalHTML = document.body.innerHTML;
+
+        // Generamos el contenido del informe
+        var contentDiv = buildPDFContent(data);
+
+        // Estilos mínimos para impresión
+        var printCSS = '' +
+            '<style>' +
+            'body{font-family:Arial,sans-serif;margin:0;padding:12px;color:#111827;}' +
+            '@page{size:A4;margin:10mm;}' +
+            'table{width:100%;border-collapse:collapse;}' +
+            'td,th{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}' +
+            'h1,h2,h3{margin:0 0 8px 0;}' +
+            '.no-print{display:none !important;}' +
+            '</style>';
+
+        // Reemplazamos el body por la vista imprimible (sin popups)
+        document.body.innerHTML = printCSS + contentDiv.innerHTML;
+
+        // Espera a que renderice y dispara impresión
+        setTimeout(function () {
+            window.print();
+
+            // Restaurar la app después de imprimir
+            setTimeout(function () {
+                document.body.innerHTML = originalHTML;
+
+                // Re-inicializar (porque al restaurar se pierden listeners)
+                initTabs();
+                initForm();
+                initQRPanel();
+                initHistorial();
+                initPhotoPreview();
+                checkURLParams();
+                setDefaultDate();
+                flushPendientesDrive();
+
+                showToast('Listo. Guardá como PDF y compartilo por WhatsApp', 'success');
+            }, 300);
+
+        }, 200);
+    }
+
+
         showToast('Abriendo vista para imprimir...', '');
 
         // Reutiliza el mismo contenido que el PDF
@@ -913,6 +960,5 @@ function flushPendientesDrive() {
     }
 
 })();
-
 
 
