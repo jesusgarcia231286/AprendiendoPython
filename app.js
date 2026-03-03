@@ -314,6 +314,61 @@ function flushPendientesDrive() {
             margin: [10, 10, 10, 10],
             filename: 'Mantenimiento_' + (data.sala || 'Sala').replace(/\s/g, '_') + '_' + (data.fecha || 'sin_fecha') + '.pdf',
             image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Asegurar que el navegador "pinte" el DOM antes de capturar (evita PDF en blanco en algunos móviles)
+        setTimeout(function () {
+            html2pdf()
+                .set(opt)
+                .from(pdfContent)
+                .outputPdf('blob')
+                .then(function (blob) {
+                    var fileName = opt.filename;
+                    var file = new File([blob], fileName, { type: 'application/pdf' });
+
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        return navigator.share({
+                            files: [file],
+                            title: 'Informe SW-302',
+                            text: 'Adjunto informe en PDF'
+                        });
+                    }
+
+                    // Fallback: descargar
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+
+                    showToast('PDF descargado (compartilo por WhatsApp)', 'success');
+                })
+                .catch(function (e) {
+                    console.error(e);
+                    showToast('No se pudo generar/compartir el PDF', 'error');
+                })
+                .finally(function () {
+                    if (pdfContent && pdfContent.parentNode) {
+                        pdfContent.parentNode.removeChild(pdfContent);
+                    }
+                });
+        }, 150);
+    }
+
+
+        showToast('Generando PDF para compartir...', '');
+
+        var pdfContent = buildPDFContent(data);
+
+        var opt = {
+            margin: [10, 10, 10, 10],
+            filename: 'Mantenimiento_' + (data.sala || 'Sala').replace(/\s/g, '_') + '_' + (data.fecha || 'sin_fecha') + '.pdf',
+            image: { type: 'jpeg', quality: 0.95 },
             html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
