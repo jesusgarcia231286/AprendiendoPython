@@ -211,27 +211,33 @@ var DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
 
     // Envío sin preflight (form-urlencoded) para poder leer respuesta
     function enviarRegistroADrive(registro) {
-        var payload = JSON.stringify({ apiKey: DRIVE_API_KEY, registro: registro });
-        var body = new URLSearchParams();
-        body.set('payload', payload);
+        // FIX móvil: algunos navegadores in-app (WhatsApp/IG) bloquean o rompen fetch a script.google.com
+        // Usamos sendBeacon (más compatible) y fallback a fetch no-cors. No intentamos leer respuesta.
+        var payloadJson = JSON.stringify({ apiKey: DRIVE_API_KEY, registro: registro });
 
+        // 1) Intentar sendBeacon
+        try {
+            if (navigator && typeof navigator.sendBeacon === 'function') {
+                var beaconBody = new Blob(
+                    ['payload=' + encodeURIComponent(payloadJson)],
+                    { type: 'application/x-www-form-urlencoded;charset=UTF-8' }
+                );
+                var ok = navigator.sendBeacon(DRIVE_ENDPOINT_URL, beaconBody);
+                if (ok) return Promise.resolve(true);
+            }
+        } catch (e) { /* seguimos */ }
+
+        // 2) Fallback: fetch sin leer respuesta (no-cors)
+        var formBody = 'payload=' + encodeURIComponent(payloadJson);
         return fetch(DRIVE_ENDPOINT_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-            body: body.toString()
-        }).then(function (res) {
-            return res.text().then(function (txt) {
-                var out = null;
-                try { out = JSON.parse(txt); } catch (e) { out = { ok: res.ok, raw: txt }; }
-                if (!res.ok || (out && out.ok === false)) {
-                    throw new Error((out && out.error) ? out.error : ('HTTP ' + res.status));
-                }
-                return out;
-            });
-        });
-    }
+            body: formBody
+        }).then(function () { return true; });
+}
 
-    function flushPendientesDrive() {
+function flushPendientesDrive() {
         var pendientes = driveQueueGet();
         if (!pendientes.length) return Promise.resolve();
 
