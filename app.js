@@ -115,7 +115,8 @@ var DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
         var btnPDF = document.getElementById('btnPDF');
 
         
-                var btnImprimirPDF = document.getElementById('btnImprimirPDF');
+                        var btnPDFDrive = document.getElementById('btnPDFDrive');
+var btnImprimirPDF = document.getElementById('btnImprimirPDF');
 var btnCompartirPDF = document.getElementById('btnCompartirPDF');
 if (btnGuardar) {
             btnGuardar.addEventListener('click', guardarRegistro);
@@ -125,7 +126,11 @@ if (btnGuardar) {
         }
     
         
-        if (btnImprimirPDF) {
+        
+        if (btnPDFDrive) {
+            btnPDFDrive.addEventListener('click', generarPDFenDrive);
+        }
+if (btnImprimirPDF) {
             btnImprimirPDF.addEventListener('click', imprimirPDF);
         }
 if (btnCompartirPDF) {
@@ -275,7 +280,48 @@ function flushPendientesDrive() {
 
 
 
-    // ============ PDF EXPORT ============
+    
+
+    // ============ PDF (DRIVE SERVER-SIDE) ============
+    function generarPDFenDrive() {
+        var data = collectFormData();
+        if (!data || !data.sala) {
+            showToast('Seleccioná una sala', 'error');
+            return;
+        }
+        if (!data.tecnico) {
+            showToast('Ingresá el nombre del técnico', 'error');
+            return;
+        }
+
+        showToast('Generando PDF en Drive...', '');
+
+        var payloadJson = JSON.stringify({ apiKey: DRIVE_API_KEY, registro: data });
+
+        // POST tradicional (evita CORS en celulares). Abre la página del Apps Script con el link al PDF.
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = DRIVE_ENDPOINT_URL;
+        form.style.display = 'none';
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'payload';
+        input.value = payloadJson;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+
+        try {
+            form.submit();
+        } finally {
+            setTimeout(function () {
+                try { form.remove(); } catch (e) {}
+            }, 3000);
+        }
+    }
+
+// ============ PDF EXPORT ============
     function exportarPDF() {
         var data = collectFormData();
         if (!data || !data.sala) {
@@ -310,53 +356,6 @@ function flushPendientesDrive() {
             showToast('Completá al menos la sala antes de imprimir', 'error');
             return;
         }
-
-        showToast('Preparando impresión...', '');
-
-        // Guardamos el HTML actual para restaurarlo después
-        var originalHTML = document.body.innerHTML;
-
-        // Generamos el contenido del informe
-        var contentDiv = buildPDFContent(data);
-
-        // Estilos mínimos para impresión
-        var printCSS = '' +
-            '<style>' +
-            'body{font-family:Arial,sans-serif;margin:0;padding:12px;color:#111827;}' +
-            '@page{size:A4;margin:10mm;}' +
-            'table{width:100%;border-collapse:collapse;}' +
-            'td,th{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}' +
-            'h1,h2,h3{margin:0 0 8px 0;}' +
-            '.no-print{display:none !important;}' +
-            '</style>';
-
-        // Reemplazamos el body por la vista imprimible (sin popups)
-        document.body.innerHTML = printCSS + contentDiv.innerHTML;
-
-        // Espera a que renderice y dispara impresión
-        setTimeout(function () {
-            window.print();
-
-            // Restaurar la app después de imprimir
-            setTimeout(function () {
-                document.body.innerHTML = originalHTML;
-
-                // Re-inicializar (porque al restaurar se pierden listeners)
-                initTabs();
-                initForm();
-                initQRPanel();
-                initHistorial();
-                initPhotoPreview();
-                checkURLParams();
-                setDefaultDate();
-                flushPendientesDrive();
-
-                showToast('Listo. Guardá como PDF y compartilo por WhatsApp', 'success');
-            }, 300);
-
-        }, 200);
-    }
-
 
         showToast('Abriendo vista para imprimir...', '');
 
@@ -960,5 +959,8 @@ function flushPendientesDrive() {
     }
 
 })();
+
+
+
 
 
