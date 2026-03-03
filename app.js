@@ -115,7 +115,8 @@ var DRIVE_QUEUE_KEY = "sw302_drive_queue_v1";
         var btnPDF = document.getElementById('btnPDF');
 
         
-        var btnCompartirPDF = document.getElementById('btnCompartirPDF');
+                var btnImprimirPDF = document.getElementById('btnImprimirPDF');
+var btnCompartirPDF = document.getElementById('btnCompartirPDF');
 if (btnGuardar) {
             btnGuardar.addEventListener('click', guardarRegistro);
         }
@@ -123,7 +124,11 @@ if (btnGuardar) {
             btnPDF.addEventListener('click', exportarPDF);
         }
     
-        if (btnCompartirPDF) {
+        
+        if (btnImprimirPDF) {
+            btnImprimirPDF.addEventListener('click', imprimirPDF);
+        }
+if (btnCompartirPDF) {
             btnCompartirPDF.addEventListener('click', compartirPDF);
         }
 }
@@ -297,6 +302,55 @@ function flushPendientesDrive() {
             }
         });
     }
+
+    // ============ PDF (IMPRIMIR -> GUARDAR COMO PDF) ============
+    function imprimirPDF() {
+        var data = collectFormData();
+        if (!data || !data.sala) {
+            showToast('Completá al menos la sala antes de imprimir', 'error');
+            return;
+        }
+
+        showToast('Abriendo vista para imprimir...', '');
+
+        // Reutiliza el mismo contenido que el PDF
+        var contentDiv = buildPDFContent(data);
+
+        var html = '' +
+            '<!DOCTYPE html><html lang="es"><head>' +
+            '<meta charset="UTF-8" />' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0" />' +
+            '<title>Informe SW-302</title>' +
+            '<style>' +
+            'body{font-family:Arial,sans-serif;margin:0;padding:12px;color:#111827;}' +
+            '@page{size:A4;margin:10mm;}' +
+            'table{width:100%;border-collapse:collapse;}' +
+            'td,th{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}' +
+            'h1,h2,h3{margin:0 0 8px 0;}' +
+            '</style>' +
+            '</head><body>' +
+            contentDiv.innerHTML +
+            '<script>' +
+            'window.onload=function(){setTimeout(function(){window.print();},300);};' +
+            '</script>' +
+            '</body></html>';
+
+        var w = window.open('', '_blank');
+        if (!w) {
+            showToast('El navegador bloqueó la ventana. Permití pop-ups y reintentá.', 'error');
+            try { if (contentDiv.parentNode) contentDiv.parentNode.removeChild(contentDiv); } catch(e){}
+            return;
+        }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+
+        // Limpieza del div temporal
+        try {
+            if (contentDiv && contentDiv.parentNode) contentDiv.parentNode.removeChild(contentDiv);
+        } catch (e) {}
+    }
+
 
     // ============ PDF SHARE (WhatsApp / Android) ============
     function compartirPDF() {
@@ -859,4 +913,6 @@ function flushPendientesDrive() {
     }
 
 })();
+
+
 
